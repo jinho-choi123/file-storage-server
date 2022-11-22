@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <title>File Transfer Service</title>
+    </head>
+    <body>
+        Choose service you want to use
+        <button id="Link">Share file by Link(store files in server)</button>
+        <button id="P2P">Share file by P2P(doesn't store files in server)</button>
+        <script type="text/javascript">
+            const link = document.getElementById('Link')
+            const p2p = document.getElementById('P2P')
+
+            link.addEventListener('click', () => {
+                window.location.href='http://localhost:9000/link'
+            })
+
+            p2p.addEventListener('click', () => {
+                window.location.href='http://localhost:9000/p2p'
+            })
+        </script>
+    </body>
+</html>
