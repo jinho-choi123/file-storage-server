@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>File Transfer Service</title>
+    </head>
+    <body>
+        <a href="http://localhost:9000/">Home</a>
+        <br>
+        <br>
+    Total files number: {{data.filenumbers}}
+    <br>
+    Total files Size: {{data.size}}KB
+    <br>
+    Expired At: {{data.expiredAt}}
+    <br>
+    {% for filename in data.filenames %} 
+        <li><a href="http://localhost:9000/download?linkid={{data.linkId}}&filename={{filename}}">{{filename}}</a></li>
+    {% endfor %}
+    </body>
+</html>
