@@ -6,9 +6,13 @@ import os
 from werkzeug.utils import secure_filename
 import zipfile
 from database import add_file_group, search_file_group
+import sqlite3
 
 app = Flask(__name__)
 load_dotenv()
+connect = sqlite3.connect('fileInfo.db', check_same_thread = False)
+cursor = connect.cursor()
+
 
 UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -38,13 +42,13 @@ def upload():
             filename = secure_filename(file.filename)
             filenamelist.append(filename)
             file.save(UPLOAD_FOLDER+linkId+'/'+filename)
-        add_file_group(linkId, filenamelist)
+        add_file_group(cursor, linkId)
         return [linkId, 'link']
 
 @app.route('/downloadlist')
 def download():
     linkId = request.args.get('linkid')
-    filenamelist = search_file_group(linkId)
+    filenamelist = search_file_group(cursor, linkId)
     return filenamelist
 
 
