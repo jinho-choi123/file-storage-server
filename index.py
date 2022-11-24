@@ -1,15 +1,12 @@
-from flask import Flask, render_template, redirect, url_for, send_from_directory
-from flask import request
+from flask import Flask, render_template, request, send_from_directory
 from dotenv import load_dotenv
 from utils import createDir, makeuid, allowed_file
 import os
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
-import zipfile
 from database import add_file_group, search_file_group
 import sqlite3
 from math import ceil
-
 app = Flask(__name__)
 load_dotenv()
 connect = sqlite3.connect('fileInfo.db', check_same_thread = False, isolation_level=None)
@@ -36,7 +33,6 @@ def p2p():
 @app.route('/upload', methods=['POST'])
 def upload():
     files = request.files.getlist("files")
-    print(files)
     if files == []:
         return render_template("fail.html", msg="no file")
     linkId = makeuid()
@@ -53,7 +49,6 @@ def upload():
             size += os.path.getsize(filepath)
         else:
             return render_template("fail.html", msg="please check uploading file's extention. we only allow txt, pdf, png, jpg, jpeg, gif, mp3, mp4")
-    #size in KB
     size = ceil(size / pow(2, 10))
     add_file_group(cursor, linkId, expirationHours, cnt, size)
     return render_template("success.html", data={"linkId": linkId, "cnt": cnt, "size": size, "expirationHours": expirationHours})
@@ -77,6 +72,7 @@ def download():
     filename = request.args.get('filename')
     filepath = safe_join(UPLOAD_FOLDER, linkId)
     return send_from_directory(filepath, filename, as_attachment=True)
+
 
 
 if __name__ == '__main__':
