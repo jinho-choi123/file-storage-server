@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, send_from_directory
 from flask import request
 from dotenv import load_dotenv
-from utils import createDir, makeuid
+from utils import createDir, makeuid, allowed_file
 import os
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
@@ -18,6 +18,7 @@ cursor = connect.cursor()
 
 UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = os.environ.get('MAX_CONTENT_LENGTH')
 
 
 @app.route('/')
@@ -34,26 +35,28 @@ def p2p():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-        files = request.files.getlist("file[]")
-        if files is []:
-            return 'no files'
-        linkId = makeuid()
-        createDir(linkId)
-        cnt = 0 
-        size = 0
-        expirationHours = 3
-        for file in files:
-            filename = secure_filename(file.filename)
-            filepath = UPLOAD_FOLDER+linkId+'/'+filename
+    files = request.files.getlist("files")
+    print(files)
+    if files == []:
+        return render_template("fail.html", msg="no file")
+    linkId = makeuid()
+    createDir(linkId)
+    size = 0
+    cnt = 0
+    expirationHours = 3
+    for file in files:
+        filename = secure_filename(file.filename)
+        if allowed_file(filename):
+            filepath = os.path.join(*[UPLOAD_FOLDER, linkId, filename])
             file.save(filepath)
-            size += os.path.getsize(filepath)
             cnt += 1
-        
-        #size in KB
-            file.save(filepath)
-        size = ceil(size / pow(2, 10))
-        add_file_group(cursor, linkId, expirationHours, cnt, size)
-        return render_template("success.html", data={"linkId": linkId, "cnt": cnt, "size": size, "expirationHours": expirationHours})
+            size += os.path.getsize(filepath)
+        else:
+            return render_template("fail.html", msg="please check uploading file's extention. we only allow txt, pdf, png, jpg, jpeg, gif, mp3, mp4")
+    #size in KB
+    size = ceil(size / pow(2, 10))
+    add_file_group(cursor, linkId, expirationHours, cnt, size)
+    return render_template("success.html", data={"linkId": linkId, "cnt": cnt, "size": size, "expirationHours": expirationHours})
 
 @app.route('/downloadlist')
 def downloadlist():
