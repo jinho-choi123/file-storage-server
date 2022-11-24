@@ -7,9 +7,8 @@
         <button id="Link">Share file by Link(store files in server)</button>
         <script type="text/javascript">
             const link = document.getElementById('Link')
-
             link.addEventListener('click', () => {
-                window.location.href='http://localhost:9000/link'
+                window.location.href='{{data.serverAddr}}link'
             })
 
         </script>

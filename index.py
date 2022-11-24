@@ -7,8 +7,11 @@ from werkzeug.security import safe_join
 from database import add_file_group, search_file_group
 import sqlite3
 from math import ceil
-app = Flask(__name__)
 load_dotenv()
+app = Flask(__name__)
+SERVER_ADDR = os.environ.get('SERVER_ADDR')
+SERVER_PORT = os.environ.get('SERVER_PORT')
+
 connect = sqlite3.connect('fileInfo.db', check_same_thread = False, isolation_level=None)
 cursor = connect.cursor()
 
@@ -20,15 +23,11 @@ app.config['MAX_CONTENT_LENGTH'] = os.environ.get('MAX_CONTENT_LENGTH')
 
 @app.route('/')
 def homepage():
-    return render_template('index.html')
+    return render_template('index.html', data={"serverAddr": SERVER_ADDR})
 
 @app.route('/link')
 def linkpage():
-    return render_template('link.html')
-
-@app.route('/p2p')
-def p2p():
-    return render_template('p2p.html')
+    return render_template('link.html', data={"serverAddr": SERVER_ADDR})
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -51,7 +50,7 @@ def upload():
             return render_template("fail.html", msg="please check uploading file's extention. we only allow txt, pdf, png, jpg, jpeg, gif, mp3, mp4")
     size = ceil(size / pow(2, 10))
     add_file_group(cursor, linkId, expirationHours, cnt, size)
-    return render_template("success.html", data={"linkId": linkId, "cnt": cnt, "size": size, "expirationHours": expirationHours})
+    return render_template("success.html", data={"serverAddr": SERVER_ADDR, "linkId": linkId, "cnt": cnt, "size": size, "expirationHours": expirationHours})
 
 @app.route('/downloadlist')
 def downloadlist():
@@ -64,7 +63,7 @@ def downloadlist():
     filenumbers = filesData[2]
     filesize = filesData[3]
     expiredAt = filesData[1]
-    return render_template("download.html", data={"linkId": linkId, "filenames": filenameList, "filenumbers": filenumbers, "size": filesize, "expiredAt": expiredAt})
+    return render_template("download.html", data={"serverAddr": SERVER_ADDR, "linkId": linkId, "filenames": filenameList, "filenumbers": filenumbers, "size": filesize, "expiredAt": expiredAt})
 
 @app.route('/download')
 def download():
@@ -76,4 +75,4 @@ def download():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0",debug=True, port=9000)
+    app.run(host="0.0.0.0", port=SERVER_PORT)
