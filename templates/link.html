@@ -1,0 +1,14 @@
+<html>
+    <head>
+        <title>File Transfer Service</title>
+    </head>
+
+    <body>
+        <button id="Home">Go back to home</button>
+        Upload files(Link)!
+        <form method="POST" enctype="multipart/form-data" action="http://localhost:9000/upload">
+            <input type="file" multiple name="files"/>
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+</html>
